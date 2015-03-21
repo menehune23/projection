@@ -35,6 +35,7 @@ DEG_TO_RAD	LITERAL1
 #######################################
 # Member Variables (LITERAL2)
 #######################################
+
 projMode	LITERAL2
 transform	LITERAL2
 focalDistPx	LITERAL2
