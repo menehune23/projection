@@ -1,0 +1,45 @@
+#######################################
+# Syntax Coloring Map For Projection
+#######################################
+
+#######################################
+# Datatypes (KEYWORD1)
+#######################################
+
+Camera	KEYWORD1
+Transform	KEYWORD1
+point2	KEYWORD1
+point3	KEYWORD1
+line2	KEYWORD1
+line3	KEYWORD1
+PROJ_MODE	KEYWORD1
+
+
+#######################################
+# Methods and Functions (KEYWORD2)
+#######################################
+
+project	KEYWORD2
+
+
+#######################################
+# Constants (LITERAL1)
+#######################################
+
+PROJ_PERSPECTIVE	LITERAL1
+PROJ_ORTHO	LITERAL1
+RAD_TO_DEG	LITERAL1
+DEG_TO_RAD	LITERAL1
+
+
+#######################################
+# Member Variables (LITERAL2)
+#######################################
+projMode	LITERAL2
+transform	LITERAL2
+focalDistPx	LITERAL2
+nearDist	LITERAL2
+farDist	LITERAL2
+orthoViewWidth	LITERAL2
+screenWidth	LITERAL2
+screenHeight	LITERAL2
