@@ -2,8 +2,11 @@
 // HelloCube_Faster
 // by Andrew Meyer, Mar 2015
 // 
-// Demonstrates drawing a simple cube on a
-// MicroView ( http://sfe.io/p12923 ).
+// Demonstrates drawing a simple cube on a 
+// Microview ( http://sfe.io/p12923 ).
+// 
+// Removes redundancy by applying cube's
+// transform to vertices before forming lines.
 ///////////////////////////////////////////////
 
 #include <MicroView.h>
@@ -30,21 +33,24 @@ point3 cubeVerts[] = {
     { -1, -1, -1 },
     { -1,  1, -1 }
 };
-
-// Cube lines
-line3 cubeLines[] = {
-    { cubeVerts[0], cubeVerts[1] },
-    { cubeVerts[1], cubeVerts[2] },
-    { cubeVerts[2], cubeVerts[3] },
-    { cubeVerts[3], cubeVerts[0] },
-    { cubeVerts[4], cubeVerts[5] },
-    { cubeVerts[5], cubeVerts[6] },
-    { cubeVerts[6], cubeVerts[7] },
-    { cubeVerts[7], cubeVerts[4] },
-    { cubeVerts[0], cubeVerts[4] },
-    { cubeVerts[1], cubeVerts[5] },
-    { cubeVerts[2], cubeVerts[6] },
-    { cubeVerts[3], cubeVerts[7] },
+    
+// Each pair of indices denotes endpoints
+// from cubeVerts above
+byte cubeLineIndices[] = {
+    0, 1,  // Top square
+    1, 2,
+    2, 3,
+    3, 0,
+    
+    4, 5,  // Bottom square
+    5, 6,
+    6, 7,
+    7, 4,
+    
+    0, 4,  // Sides
+    1, 5,
+    2, 6,
+    3, 7
 };
 
 // Create a camera
@@ -98,10 +104,25 @@ void updateCube()
 
 void drawCube()
 {
-    for (byte i = 0; i < 12; i++)
+    point3 verts[8];
+    
+    // Apply cube transform to vertices
+    for (byte i = 0; i < 8; i++)
     {
-        // Project line to screen after applying cube transform
-        line2 line = cam.project(cubeTrans * cubeLines[i]);
+        verts[i] = cubeTrans * cubeVerts[i];
+    }
+    
+    // Draw projected cube lines
+    for (byte i = 0; i < 24; i += 2)
+    {
+        // Get line to project
+        line3 cubeLine = {
+            verts[cubeLineIndices[i]],
+            verts[cubeLineIndices[i + 1]]
+        };
+        
+        // Project line to screen
+        line2 line = cam.project(cubeLine);
         
         // Draw if not clipped completely
         if (!isnan(line.p0.x))

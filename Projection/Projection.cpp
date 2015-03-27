@@ -1,3 +1,13 @@
+//////////////////////////////////////////////////////////////////////
+// Projection library for Arduino
+// Created March 2105 by Andrew Meyer
+// 
+// NOTES:
+//  - Coordinate system is a right-handed, Z-up system
+//  - 3D rotations follow ZYX Euler angle convention (yaw-pitch-roll)
+//  - Angles are assumed to be in degrees
+//////////////////////////////////////////////////////////////////////
+
 #include <Projection.h>
 
 Transform::Transform()
@@ -106,13 +116,13 @@ line3 Transform::operator *(const line3 &line) const
 }
 
 Camera::Camera()
-    : transform(Transform(-90, 0, -90, 1, 1, 1, 0, 0, 0))
+    : transform(Transform(-90, 0, 0, 1, 1, 1, 0, 0, 0))
 { }
 
 Camera::Camera(int displayWidth, int displayHeight)
     : screenWidth(displayWidth), screenHeight(displayHeight), projMode(PROJ_PERSPECTIVE),
       focalDistPx(75), nearDist(MIN_NEAR_DIST), farDist(1000.0),
-      transform(Transform(-90, 0, -90, 1, 1, 1, 0, 0, 0))
+      transform(Transform(-90, 0, 0, 1, 1, 1, 0, 0, 0))
 { }
 
 point2 Camera::project(const point3 &point, bool clip /* = true */, bool round /* = true */) const
