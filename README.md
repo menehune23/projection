@@ -1,5 +1,5 @@
 # projection
-![Projection logo](https://coeurdecode.files.wordpress.com/2015/04/apl_logo-e1430089140768.png)
+![Projection logo](https://coeurdecode.files.wordpress.com/2015/03/apl_logo1-e1430090871131.png)
 
 A lightweight 3D-2D projection library for small screens on Arduino
 
