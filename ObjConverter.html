@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <style>
+            html {
+                font-family: sans-serif;
+                height: 100%;
+            }
+            
+            .field {
+                margin-left: 10px;
+                margin-right: 10px;
+                margin-top: 10px;
+                margin-bottom: 20px;
+            }
+            
+            .helptext {
+                margin-top: 5px;
+                font-size: small;
+                font-style: italic;
+            }
+            
+            textarea {
+                font-family: monospace;
+                font-size: 14px;
+                margin-top: 10px;
+                width: 75%;
+                max-width: 100%;
+                height: 300px;
+            }
+            
+            label {
+                font-weight: bold;
+            }
+            
+            input, select {
+                margin-top: 5px;
+        </style>
+    </head>
+    
+    <body>
+        <h2>OBJ to C++ Converter</h2>
+        Upload an OBJ file to convert it to C++ code for use with the <a href="https://github.com/menehune23/projection" target="_blank">Arduino Projection library</a>
+        <div class="helptext">
+            Requires a modern browser with HTML 5 compatibility
+        </div>
+        <div class="field">
+            <label>OBJ File</label>
+            <br/>
+            <div id="file_div">
+                <input id="obj_file" type="file" accept=".obj" onchange="convertFile(this)">
+            </div>
+            <input id="clear_button" type="button" value="Clear" onclick="clearAll()">
+        </div>
+        <div class="field">
+            <label>Tabs</label>
+            <br/>
+            <select id="tab_opt">
+                <option value="&#9;" selected>Tab</option>
+                <option value=" ">1 space</option>
+                <option value="  ">2 spaces</option>
+                <option value="   ">3 spaces</option>
+                <option value="    ">4 spaces</option>
+                <option value="     ">5 spaces</option>
+                <option value="      ">6 spaces</option>
+                <option value="       ">7 spaces</option>
+                <option value="        ">8 spaces</option>
+                <option value="         ">9 spaces</option>
+                <option value="          ">10 spaces</option>
+            </select>
+        </div>
+        <div class="field">
+            <label>C++ Code</label>
+            <div class="helptext">
+                Click text area to select code
+            </div>
+            <textarea id="cpp_text" readonly="true" onclick="this.select()"></textarea>
+        </div>
+        
+        <script>
+            // Clears file input and C++ text
+            function clearAll() {
+                // Reset file input
+                document.getElementById("file_div").innerHTML = document.getElementById("file_div").innerHTML;
+
+                // Reset C++ text
+                document.getElementById("cpp_text").innerHTML = "";
+            }
+            
+            // Loads OBJ file and converts it to C++ code
+            function convertFile(fileInput) {
+                if (!window.FileReader) {
+                    alert("This browser does not support HTML 5!");
+                    return;
+                }
+                
+                var file = fileInput.files[0];
+                
+                if (file) {
+                    // Create a reader
+                    var reader = new FileReader();
+                    reader.onload = function(e) {
+                        document.getElementById("cpp_text").innerHTML = parseFile(e.target.result);
+                    }
+                    
+                    // Read file
+                    reader.readAsText(file);
+                } else {
+                    alert("Error loading file!");
+                }
+            }
+            
+            // Parses OBJ file contents and returns C++ code
+            function parseFile(content) {
+                var lines = content.split("\n");
+                var line;
+                var verts = "vertices[] = {\n";
+                var indices = "indices[] = {\n";
+                var numVerts = 0;
+                var numIndices = 0;
+                var tabSel = document.getElementById("tab_opt");
+                var tab = tabSel.options[tabSel.selectedIndex].value;
+                
+                for (var i = 0; i < lines.length; i++) {
+                    line = lines[i];
+                    
+                    switch (line.substr(0, 2))
+                    {
+                        // Add new vertex
+                        case "v ":
+                            verts += tab + "{ " + line.substr(2).replace(new RegExp(" ", "g"), ", ") + " },\n";
+                            numVerts++;
+                        break;
+                        
+                        // Add new face lines
+                        case "f ":
+                            face = line.substr(2).split(" ");
+                            for (var f = 0; f < face.length; f++)
+                            {
+                                indices += tab + (face[f] - 1) + ", " + (face[(f == face.length - 1) ? 0 : (f + 1)]  - 1) + ",\n";
+                            }
+                            
+                            indices += "\n";
+                            numIndices += face.length;
+                        break;
+                    }
+                }
+                
+                // Check if nothing to return
+                if (numVerts == 0 || numIndices == 0) {
+                    return "";
+                }
+                    
+                // Close up arrays
+                verts = verts.substr(0, verts.length - 2) + "\n};";
+                indices = indices.substr(0, indices.length - 3) + "\n};";
+                
+                return "const unsigned int NUM_VERTICES = " + numVerts + ";\n\n" + verts + "\n\n" +
+                    "const unsigned in NUM_INDICES = " + numIndices + ";\n\n" + indices + "\n";
+            }
+        </script>
+    </body>
+</html>
