@@ -11,6 +11,18 @@
                 margin-left: 10px;
                 margin-right: 10px;
                 margin-top: 10px;
+                margin-bottom: 10px;
+            }
+            
+            .output {
+                margin-left: 10px;
+                margin-right: 10px;
+                margin-top: 10px;
+                margin-bottom: 20px;
+            }
+            
+            .buttonpane {
+                margin-top: 20px;
                 margin-bottom: 20px;
             }
             
@@ -27,10 +39,13 @@
                 width: 75%;
                 max-width: 100%;
                 height: 300px;
+                white-space: pre;
+                word-wrap: normal;
             }
             
             label {
                 font-weight: bold;
+                font-size: 14px;
             }
             
             input, select {
@@ -48,14 +63,13 @@
             <label>OBJ File</label>
             <br/>
             <div id="file_div">
-                <input id="obj_file" type="file" accept=".obj" onchange="convertFile(this)">
+                <input id="obj_file" type="file" accept=".obj" onchange="enableConvert()">
             </div>
-            <input id="clear_button" type="button" value="Clear" onclick="clearAll()">
         </div>
         <div class="field">
             <label>Tabs</label>
             <br/>
-            <select id="tab_opt">
+            <select id="tab_sel">
                 <option value="&#9;" selected>Tab</option>
                 <option value=" ">1 space</option>
                 <option value="  ">2 spaces</option>
@@ -69,7 +83,11 @@
                 <option value="          ">10 spaces</option>
             </select>
         </div>
-        <div class="field">
+        <div class="output">
+            <div class="buttonpane">
+                <input id="convert_button" type="button" value="Convert" onclick="convertFile()" disabled="true">
+                <input id="clear_button" type="button" value="Clear" onclick="clearFile()">
+            </div>
             <label>C++ Code</label>
             <div class="helptext">
                 Click text area to select code
@@ -78,23 +96,31 @@
         </div>
         
         <script>
+            // Enables convert button
+            function enableConvert() {
+                document.getElementById("convert_button").disabled = false;
+            }
+            
             // Clears file input and C++ text
-            function clearAll() {
+            function clearFile() {
                 // Reset file input
                 document.getElementById("file_div").innerHTML = document.getElementById("file_div").innerHTML;
 
                 // Reset C++ text
                 document.getElementById("cpp_text").innerHTML = "";
+                
+                // Disable convert button
+                document.getElementById("convert_button").disabled = true;
             }
             
             // Loads OBJ file and converts it to C++ code
-            function convertFile(fileInput) {
+            function convertFile() {
                 if (!window.FileReader) {
                     alert("This browser does not support HTML 5!");
                     return;
                 }
                 
-                var file = fileInput.files[0];
+                var file = document.getElementById("obj_file").files[0];
                 
                 if (file) {
                     // Create a reader
@@ -114,11 +140,11 @@
             function parseFile(content) {
                 var lines = content.split("\n");
                 var line;
-                var verts = "vertices[] = {\n";
+                var verts = "point3 vertices[] = {\n";
                 var indices = "indices[] = {\n";
                 var numVerts = 0;
                 var numIndices = 0;
-                var tabSel = document.getElementById("tab_opt");
+                var tabSel = document.getElementById("tab_sel");
                 var tab = tabSel.options[tabSel.selectedIndex].value;
                 
                 for (var i = 0; i < lines.length; i++) {
@@ -153,10 +179,10 @@
                     
                 // Close up arrays
                 verts = verts.substr(0, verts.length - 2) + "\n};";
-                indices = indices.substr(0, indices.length - 3) + "\n};";
+                indices = ((numVerts > 256) ? "unsigned int " : "byte ") + indices.substr(0, indices.length - 3) + "\n};";
                 
                 return "const unsigned int NUM_VERTICES = " + numVerts + ";\n\n" + verts + "\n\n" +
-                    "const unsigned in NUM_INDICES = " + numIndices + ";\n\n" + indices + "\n";
+                    "const unsigned int NUM_INDICES = " + numIndices + ";\n\n" + indices + "\n";
             }
         </script>
     </body>
