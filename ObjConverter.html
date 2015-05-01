@@ -70,11 +70,11 @@
             <label>Tabs</label>
             <br/>
             <select id="tab_sel">
-                <option value="&#9;" selected>Tab</option>
+                <option value="&#9;">Tab</option>
                 <option value=" ">1 space</option>
                 <option value="  ">2 spaces</option>
                 <option value="   ">3 spaces</option>
-                <option value="    ">4 spaces</option>
+                <option value="    " selected>4 spaces</option>
                 <option value="     ">5 spaces</option>
                 <option value="      ">6 spaces</option>
                 <option value="       ">7 spaces</option>
@@ -141,11 +141,12 @@
                 var lines = content.split("\n");
                 var line;
                 var verts = "point3 vertices[] = {\n";
-                var indices = "indices[] = {\n";
+                var indices = "lineIndices[] = {\n";
                 var numVerts = 0;
                 var numIndices = 0;
                 var tabSel = document.getElementById("tab_sel");
                 var tab = tabSel.options[tabSel.selectedIndex].value;
+                var edges = {};
                 
                 for (var i = 0; i < lines.length; i++) {
                     line = lines[i];
@@ -161,13 +162,19 @@
                         // Add new face lines
                         case "f ":
                             face = line.substr(2).split(" ");
-                            for (var f = 0; f < face.length; f++)
+                            for (var v = 0; v < face.length; v++)
                             {
-                                indices += tab + (face[f] - 1) + ", " + (face[(f == face.length - 1) ? 0 : (f + 1)]  - 1) + ",\n";
+                                // Get endpoints
+                                var e0 = face[v] - 1;
+                                var e1 = face[(v == face.length - 1) ? 0 : (v + 1)] - 1;
+                                
+                                // Include if edge not already seen
+                                if (!(edges[e0 + "," + e1] || edges[e1 + "," + e0])) {
+                                    indices += tab + e0 + ", " + e1 + ",\n";
+                                    numIndices += 2;
+                                    edges[e0 + "," + e1] = true;
+                                }
                             }
-                            
-                            indices += "\n";
-                            numIndices += face.length;
                         break;
                     }
                 }
@@ -176,13 +183,18 @@
                 if (numVerts == 0 || numIndices == 0) {
                     return "";
                 }
-                    
+                
+                // Get proper data type for number of vertices and indices
+                var numVertType = (numVerts > 255) ? "unsigned int" : "byte";
+                var numIndType = (numIndices > 255) ? "unsigned int" : "byte";
+                
                 // Close up arrays
                 verts = verts.substr(0, verts.length - 2) + "\n};";
-                indices = ((numVerts > 256) ? "unsigned int " : "byte ") + indices.substr(0, indices.length - 3) + "\n};";
+                indices = numVertType + " " + indices.substr(0, indices.length - 2) + "\n};";
                 
-                return "const unsigned int NUM_VERTICES = " + numVerts + ";\n\n" + verts + "\n\n" +
-                    "const unsigned int NUM_INDICES = " + numIndices + ";\n\n" + indices + "\n";
+                return "// Model vertices\nconst " + numVertType + " NUM_VERTICES = " + numVerts + ";\n" + verts + "\n\n" +
+                    "// Model line indices\n// Each pair of indices defines a line\nconst " + numIndType + " NUM_INDICES = " +
+                    numIndices + ";\n" + indices + "\n";
             }
         </script>
     </body>
