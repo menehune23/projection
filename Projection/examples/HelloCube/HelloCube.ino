@@ -1,5 +1,5 @@
 ///////////////////////////////////////////////
-// HelloCube_Faster
+// HelloCube
 // by Andrew Meyer, Mar 2015
 // 
 // Demonstrates drawing a simple cube on a
