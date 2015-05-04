@@ -153,7 +153,7 @@ point2 Camera::project(const point3 &point, bool clip /* = true */, bool round /
         if (ret.x < 0 || ret.x > (screenWidth - 1) ||
             ret.y < 0 || ret.y > (screenHeight - 1))
         {
-            ret = { NAN, NAN };
+            return { NAN, NAN };
         }
     }
 
