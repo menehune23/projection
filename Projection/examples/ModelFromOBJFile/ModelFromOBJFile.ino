@@ -15,7 +15,7 @@
 #define UPDATE_DELAY  0
 
 // Model properties to keep track of
-float angle;
+float angle = -90;
 Transform modelTrans;
 
 // vertices and lineIndices code was generated
