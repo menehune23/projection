@@ -1,7 +1,7 @@
 # projection
 ![Projection logo](projection_logo.png)
 
-A lightweight 3D-2D projection library for small screens on Arduino
+A simple 3D-2D projection library for small screens on Arduino
 
 ## getting started
 To get started:
