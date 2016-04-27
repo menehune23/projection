@@ -128,7 +128,7 @@ public:
     int screenHeight;      // Height of display
     
 private:
-    static const float MIN_NEAR_DIST = 0.1;
+    static constexpr const float MIN_NEAR_DIST = 0.1;
     static float getLineT(float bound, float start, float end);
     
     point2 getImageCoords(const point3 &camPoint) const;
