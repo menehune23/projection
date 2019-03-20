@@ -6,32 +6,32 @@
                 font-family: sans-serif;
                 height: 100%;
             }
-            
+
             .field {
                 margin-left: 10px;
                 margin-right: 10px;
                 margin-top: 10px;
                 margin-bottom: 10px;
             }
-            
+
             .output {
                 margin-left: 10px;
                 margin-right: 10px;
                 margin-top: 10px;
                 margin-bottom: 20px;
             }
-            
+
             .buttonpane {
                 margin-top: 20px;
                 margin-bottom: 20px;
             }
-            
+
             .helptext {
                 margin-top: 5px;
                 font-size: small;
                 font-style: italic;
             }
-            
+
             textarea {
                 font-family: monospace;
                 font-size: 14px;
@@ -42,17 +42,17 @@
                 white-space: pre;
                 word-wrap: normal;
             }
-            
+
             label {
                 font-weight: bold;
                 font-size: 14px;
             }
-            
+
             input, select {
                 margin-top: 5px;
         </style>
     </head>
-    
+
     <body>
         <h2>OBJ to C++ Converter</h2>
         Upload an OBJ file to convert it to C++ code for use with the <a href="https://github.com/menehune23/projection" target="_blank">Arduino Projection library</a>
@@ -94,13 +94,13 @@
             </div>
             <textarea id="cpp_text" readonly="true" onclick="this.select()"></textarea>
         </div>
-        
+
         <script>
             // Enables convert button
             function enableConvert() {
                 document.getElementById("convert_button").disabled = false;
             }
-            
+
             // Clears file input and C++ text
             function clearFile() {
                 // Reset file input
@@ -108,34 +108,34 @@
 
                 // Reset C++ text
                 document.getElementById("cpp_text").innerHTML = "";
-                
+
                 // Disable convert button
                 document.getElementById("convert_button").disabled = true;
             }
-            
+
             // Loads OBJ file and converts it to C++ code
             function convertFile() {
                 if (!window.FileReader) {
                     alert("This browser does not support HTML 5!");
                     return;
                 }
-                
+
                 var file = document.getElementById("obj_file").files[0];
-                
+
                 if (file) {
                     // Create a reader
                     var reader = new FileReader();
                     reader.onload = function(e) {
                         document.getElementById("cpp_text").innerHTML = parseFile(e.target.result);
                     }
-                    
+
                     // Read file
                     reader.readAsText(file);
                 } else {
                     alert("Error loading file!");
                 }
             }
-            
+
             // Parses OBJ file contents and returns C++ code
             function parseFile(content) {
                 var lines = content.split("\n");
@@ -147,10 +147,10 @@
                 var tabSel = document.getElementById("tab_sel");
                 var tab = tabSel.options[tabSel.selectedIndex].value;
                 var edges = {};
-                
+
                 for (var i = 0; i < lines.length; i++) {
                     line = lines[i];
-                    
+
                     switch (line.substr(0, 2))
                     {
                         // Add new vertex
@@ -158,7 +158,7 @@
                             verts += tab + "{ " + line.substr(2).replace(new RegExp(" ", "g"), ", ") + " },\n";
                             numVerts++;
                         break;
-                        
+
                         // Add new face lines
 						case "l ":
                         case "f ":
@@ -166,9 +166,11 @@
                             for (var v = 0; v < face.length; v++)
                             {
                                 // Get endpoints
-                                var e0 = face[v] - 1;
-                                var e1 = face[(v == face.length - 1) ? 0 : (v + 1)] - 1;
-                                
+                                // According to https://en.wikipedia.org/wiki/Wavefront_.obj_file#Face_elements
+                                // Only first part before first slash (/), is the vertex we care about.
+                                var e0 = face[v].split('/')[0] - 1;
+                                var e1 = face[(v == face.length - 1) ? 0 : (v + 1)].split('/')[0] - 1;
+
                                 // Include if edge not already seen
                                 if (!(edges[e0 + "," + e1] || edges[e1 + "," + e0])) {
                                     indices += tab + e0 + ", " + e1 + ",\n";
@@ -179,20 +181,20 @@
                         break;
                     }
                 }
-                
+
                 // Check if nothing to return
                 if (numVerts == 0 || numIndices == 0) {
                     return "";
                 }
-                
+
                 // Get proper data type for number of vertices and indices
                 var numVertType = (numVerts > 255) ? "unsigned int" : "byte";
                 var numIndType = (numIndices > 255) ? "unsigned int" : "byte";
-                
+
                 // Close up arrays
                 verts = verts.substr(0, verts.length - 2) + "\n};";
                 indices = numVertType + " " + indices.substr(0, indices.length - 2) + "\n};";
-                
+
                 return "// Model vertices\nconst " + numVertType + " NUM_VERTICES = " + numVerts + ";\n" + verts + "\n\n" +
                     "// Model line indices\n// Each pair of indices defines a line\nconst " + numIndType + " NUM_INDICES = " +
                     numIndices + ";\n" + indices + "\n";
